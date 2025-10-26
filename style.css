@@ -74,9 +74,10 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.85);
     color: white;
     pointer-events: auto;
+    overflow-y: auto;
 }
 
 .start-screen.hidden,
@@ -84,7 +85,74 @@ body {
     display: none;
 }
 
-.start-screen h1,
+/* Start Screen Intro */
+.intro-content {
+    max-width: 340px;
+    padding: 20px;
+    text-align: center;
+}
+
+.game-title {
+    font-size: 40px;
+    margin-bottom: 10px;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+    animation: titleFloat 3s ease-in-out infinite;
+}
+
+.subtitle {
+    font-size: 20px;
+    margin-bottom: 25px;
+    opacity: 0.9;
+    color: #FFD700;
+}
+
+.instructions {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+    text-align: left;
+}
+
+.instructions h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    text-align: center;
+    color: #FFD700;
+}
+
+.instruction-item {
+    display: flex;
+    align-items: center;
+    margin: 12px 0;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.instruction-item .icon {
+    font-size: 20px;
+    margin-right: 12px;
+    min-width: 30px;
+    text-align: center;
+}
+
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+@keyframes titleFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Game Over Screen */
 .game-over-screen h1 {
     font-size: 48px;
     margin-bottom: 20px;
@@ -109,7 +177,7 @@ body {
 
 button {
     padding: 15px 40px;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: bold;
     color: white;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -119,7 +187,25 @@ button {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     transition: transform 0.2s, box-shadow 0.2s;
     pointer-events: auto;
-    margin-top: 20px;
+    margin: 5px 0;
+    width: 100%;
+    max-width: 280px;
+}
+
+.primary-btn {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    font-size: 22px;
+    padding: 18px 40px;
+    animation: pulseButton 2s ease-in-out infinite;
+}
+
+@keyframes pulseButton {
+    0%, 100% {
+        box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+    }
+    50% {
+        box-shadow: 0 5px 25px rgba(76, 175, 80, 0.6);
+    }
 }
 
 button:hover {
@@ -132,8 +218,190 @@ button:active {
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
 }
 
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Leaderboard Screen */
+.leaderboard-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    pointer-events: auto;
+    padding: 40px 20px;
+    overflow-y: auto;
+}
+
+.leaderboard-screen.hidden {
+    display: none;
+}
+
+.leaderboard-screen h1 {
+    font-size: 36px;
+    margin-bottom: 30px;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+}
+
+.leaderboard-list {
+    width: 100%;
+    max-width: 320px;
+    margin-bottom: 30px;
+}
+
+.leaderboard-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    margin: 8px 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    font-size: 18px;
+    transition: background 0.2s;
+}
+
+.leaderboard-entry:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.leaderboard-entry.rank-1 {
+    background: linear-gradient(135deg, #FFD700 20%, #FFA500 100%);
+    color: #000;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.leaderboard-entry.rank-2 {
+    background: linear-gradient(135deg, #C0C0C0 20%, #808080 100%);
+    color: #000;
+    font-weight: bold;
+}
+
+.leaderboard-entry.rank-3 {
+    background: linear-gradient(135deg, #CD7F32 20%, #8B4513 100%);
+    color: #FFF;
+    font-weight: bold;
+}
+
+.entry-rank {
+    min-width: 40px;
+    font-weight: bold;
+}
+
+.entry-initial {
+    flex: 1;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.entry-score {
+    min-width: 80px;
+    text-align: right;
+    font-weight: bold;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    font-size: 18px;
+    opacity: 0.7;
+}
+
+/* New Record & Initial Input */
+.new-record {
+    font-size: 24px;
+    color: #FFD700;
+    margin: 20px 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    animation: pulse 1.5s infinite;
+}
+
+.new-record.hidden,
+.initial-input.hidden {
+    display: none;
+}
+
+.initial-input {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.initial-input p {
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+#initialInput {
+    padding: 12px 20px;
+    font-size: 24px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    text-align: center;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    border: 3px solid #FFD700;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    width: 150px;
+    margin-bottom: 10px;
+}
+
+#initialInput:focus {
+    outline: none;
+    border-color: #FFA500;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+#submitInitial {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #000;
+    margin-top: 10px;
+}
+
+.secondary-btn {
+    background: rgba(255, 255, 255, 0.2);
+    font-size: 16px;
+    padding: 12px 30px;
+    margin-top: 10px;
+}
+
+.secondary-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
 @media (max-width: 375px) {
     .game-container {
         border-radius: 0;
+    }
+
+    .leaderboard-screen h1 {
+        font-size: 28px;
+    }
+
+    .leaderboard-entry {
+        font-size: 16px;
+        padding: 10px 15px;
     }
 }

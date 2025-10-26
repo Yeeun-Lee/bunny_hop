@@ -13,20 +13,63 @@
                 <div class="distance">0m</div>
                 <div class="speed">Speed: 1.0x</div>
             </div>
-            <div class="game-over-screen" id="gameOverScreen">
+            <div class="game-over-screen hidden" id="gameOverScreen">
                 <h1>Game Over!</h1>
                 <p class="final-score">Distance: <span id="finalDistance">0</span>m</p>
+                <div id="newRecordMessage" class="new-record hidden">
+                    🏆 New Top 10 Record! 🏆
+                </div>
+                <div id="initialInputForm" class="initial-input hidden">
+                    <p>Enter your initials:</p>
+                    <input type="text" id="initialInput" maxlength="4" placeholder="AAA" />
+                    <button id="submitInitial">Submit</button>
+                </div>
                 <button id="restartButton">Restart</button>
+                <button id="viewLeaderboardBtn" class="secondary-btn">View Leaderboard</button>
             </div>
             <div class="start-screen" id="startScreen">
-                <h1>Vertical Platformer</h1>
-                <p>Tap left/right to move</p>
-                <p>Jump higher and higher!</p>
-                <button id="startButton">Start Game</button>
+                <div class="intro-content">
+                    <h1 class="game-title">⬆️ Vertical Platformer</h1>
+                    <div class="intro-text">
+                        <p class="subtitle">Jump higher and higher!</p>
+                        <div class="instructions">
+                            <h3>How to Play:</h3>
+                            <div class="instruction-item">
+                                <span class="icon">⬅️➡️</span>
+                                <span>Use arrow keys or tap left/right to move</span>
+                            </div>
+                            <div class="instruction-item">
+                                <span class="icon">⬆️</span>
+                                <span>Auto-jump when landing on platforms</span>
+                            </div>
+                            <div class="instruction-item">
+                                <span class="icon">🎯</span>
+                                <span>Climb as high as you can!</span>
+                            </div>
+                            <div class="instruction-item">
+                                <span class="icon">⚡</span>
+                                <span>Speed increases every 500m</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button id="startButton" class="primary-btn">Start Game</button>
+                        <button id="leaderboardButton" class="secondary-btn">Leaderboard</button>
+                    </div>
+                </div>
+            </div>
+            <div class="leaderboard-screen hidden" id="leaderboardScreen">
+                <h1>🏆 Top 10 🏆</h1>
+                <div id="leaderboardList" class="leaderboard-list">
+                    <div class="loading">Loading...</div>
+                </div>
+                <button id="closeLeaderboard">Close</button>
             </div>
         </div>
         <canvas id="gameCanvas"></canvas>
     </div>
+    <script src="config.js"></script>
+    <script src="leaderboard.js"></script>
     <script src="game.js"></script>
 </body>
 </html>

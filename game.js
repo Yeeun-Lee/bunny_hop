@@ -41,6 +41,7 @@ class Game {
         this.keys = {};
         this.cameraOffsetY = 0;
         this.highestY = 0; // Track highest point reached
+        this.hasStartedClimbing = false; // Track if player has started climbing
 
         this.setupControls();
         this.setupUI();
@@ -141,7 +142,11 @@ class Game {
     }
 
     restart() {
+        // Hide game over screen elements
         document.getElementById('gameOverScreen').classList.add('hidden');
+        document.getElementById('newRecordMessage').classList.add('hidden');
+        document.getElementById('initialInputForm').classList.add('hidden');
+
         this.init();
         if (!this.isRunning) {
             this.isRunning = true;
@@ -162,6 +167,7 @@ class Game {
         this.speedMultiplier = 1.0;
         this.cameraOffsetY = 0;
         this.highestY = this.player.y; // Initialize with starting position
+        this.hasStartedClimbing = false; // Reset climbing flag
     }
 
     generateInitialPlatforms() {
@@ -240,6 +246,11 @@ class Game {
         // Track highest point
         if (this.player.y < this.highestY) {
             this.highestY = this.player.y;
+
+            // Mark that player has started climbing (moved up from starting position)
+            if (!this.hasStartedClimbing && this.distance > 5) {
+                this.hasStartedClimbing = true;
+            }
         }
 
         // Remove platforms that are below screen
@@ -255,10 +266,14 @@ class Game {
         // Update difficulty
         this.updateDifficulty();
 
-        // Check game over - if player falls one screen height below their highest point
-        const fallDistance = this.player.y - this.highestY;
-        if (fallDistance > CONFIG.canvas.height) {
-            this.gameOver();
+        // Check game over - only after player has started climbing
+        // if player falls one screen height below their highest point
+        if (this.hasStartedClimbing) {
+            const fallDistance = this.player.y - this.highestY;
+            if (fallDistance > CONFIG.canvas.height) {
+                console.log('Game Over - Fall distance:', fallDistance, 'Highest Y:', this.highestY, 'Current Y:', this.player.y);
+                this.gameOver();
+            }
         }
 
         // Update UI
@@ -303,10 +318,89 @@ class Game {
         }
     }
 
-    gameOver() {
+    async gameOver() {
         this.isRunning = false;
         document.getElementById('finalDistance').textContent = this.distance;
+
+        // Check if leaderboard is enabled and score qualifies
+        if (typeof LEADERBOARD_ENABLED !== 'undefined' && LEADERBOARD_ENABLED && typeof leaderboard !== 'undefined') {
+            try {
+                await leaderboard.loadScores();
+
+                if (leaderboard.isTopTen(this.distance)) {
+                    this.showNewRecordForm();
+                } else {
+                    document.getElementById('gameOverScreen').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Leaderboard error:', error);
+                document.getElementById('gameOverScreen').classList.remove('hidden');
+            }
+        } else {
+            document.getElementById('gameOverScreen').classList.remove('hidden');
+        }
+    }
+
+    showNewRecordForm() {
+        const newRecordMessage = document.getElementById('newRecordMessage');
+        const initialInputForm = document.getElementById('initialInputForm');
+        const initialInput = document.getElementById('initialInput');
+        const submitButton = document.getElementById('submitInitial');
+
+        // Show game over screen
         document.getElementById('gameOverScreen').classList.remove('hidden');
+
+        // Show new record message and input form
+        newRecordMessage.classList.remove('hidden');
+        initialInputForm.classList.remove('hidden');
+
+        // Focus on input
+        initialInput.value = '';
+        initialInput.focus();
+
+        // Handle submit
+        const submitHandler = async () => {
+            const initial = initialInput.value.trim().toUpperCase() || 'AAA';
+
+            // Disable input while submitting
+            initialInput.disabled = true;
+            submitButton.disabled = true;
+            submitButton.textContent = 'Submitting...';
+
+            const success = await leaderboard.submitScore(this.distance, initial);
+
+            if (success) {
+                // Hide form elements
+                newRecordMessage.classList.add('hidden');
+                initialInputForm.classList.add('hidden');
+
+                // Show success message
+                alert('Score submitted successfully!');
+
+                // Reload leaderboard
+                await leaderboard.loadScores();
+            } else {
+                alert('Failed to submit score. Please try again.');
+            }
+
+            // Re-enable buttons
+            initialInput.disabled = false;
+            submitButton.disabled = false;
+            submitButton.textContent = 'Submit';
+
+            // Remove event listener
+            submitButton.removeEventListener('click', submitHandler);
+            initialInput.removeEventListener('keypress', enterHandler);
+        };
+
+        const enterHandler = (e) => {
+            if (e.key === 'Enter') {
+                submitHandler();
+            }
+        };
+
+        submitButton.addEventListener('click', submitHandler);
+        initialInput.addEventListener('keypress', enterHandler);
     }
 }
 
