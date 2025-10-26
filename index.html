@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertical Platformer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="ui-overlay">
+            <div class="score-display">
+                <div class="distance">0m</div>
+                <div class="speed">Speed: 1.0x</div>
+            </div>
+            <div class="game-over-screen" id="gameOverScreen">
+                <h1>Game Over!</h1>
+                <p class="final-score">Distance: <span id="finalDistance">0</span>m</p>
+                <button id="restartButton">Restart</button>
+            </div>
+            <div class="start-screen" id="startScreen">
+                <h1>Vertical Platformer</h1>
+                <p>Tap left/right to move</p>
+                <p>Jump higher and higher!</p>
+                <button id="startButton">Start Game</button>
+            </div>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
