@@ -5,8 +5,8 @@ const CONFIG = {
         height: 667
     },
     player: {
-        width: 30,
-        height: 30,
+        width: 50,
+        height: 70,
         jumpForce: 12,
         moveSpeed: 5,
         gravity: 0.5,
@@ -33,6 +33,12 @@ class Game {
         this.canvas.width = CONFIG.canvas.width;
         this.canvas.height = CONFIG.canvas.height;
 
+        // Disable image smoothing for crisp pixel art
+        this.ctx.imageSmoothingEnabled = false;
+        this.ctx.mozImageSmoothingEnabled = false;
+        this.ctx.webkitImageSmoothingEnabled = false;
+        this.ctx.msImageSmoothingEnabled = false;
+
         this.player = null;
         this.platforms = [];
         this.distance = 0;
@@ -58,30 +64,43 @@ class Game {
         });
 
         // Touch controls for mobile
-        let touchStartX = 0;
         this.canvas.addEventListener('touchstart', (e) => {
-            touchStartX = e.touches[0].clientX;
-        });
-
-        this.canvas.addEventListener('touchmove', (e) => {
             e.preventDefault();
-            const touchX = e.touches[0].clientX;
+            const touch = e.touches[0];
             const canvasRect = this.canvas.getBoundingClientRect();
-            const relativeX = touchX - canvasRect.left;
+            const relativeX = touch.clientX - canvasRect.left;
+            const canvasWidth = canvasRect.width;
 
-            if (relativeX < CONFIG.canvas.width / 2) {
+            if (relativeX < canvasWidth / 2) {
                 this.keys['ArrowLeft'] = true;
                 this.keys['ArrowRight'] = false;
             } else {
                 this.keys['ArrowRight'] = true;
                 this.keys['ArrowLeft'] = false;
             }
-        });
+        }, { passive: false });
 
-        this.canvas.addEventListener('touchend', () => {
+        this.canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const canvasRect = this.canvas.getBoundingClientRect();
+            const relativeX = touch.clientX - canvasRect.left;
+            const canvasWidth = canvasRect.width;
+
+            if (relativeX < canvasWidth / 2) {
+                this.keys['ArrowLeft'] = true;
+                this.keys['ArrowRight'] = false;
+            } else {
+                this.keys['ArrowRight'] = true;
+                this.keys['ArrowLeft'] = false;
+            }
+        }, { passive: false });
+
+        this.canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
             this.keys['ArrowLeft'] = false;
             this.keys['ArrowRight'] = false;
-        });
+        }, { passive: false });
 
         // Mouse controls
         let isMouseDown = false;
@@ -155,12 +174,16 @@ class Game {
     }
 
     init() {
-        // Initialize player
-        this.player = new Player(CONFIG.canvas.width / 2, CONFIG.canvas.height - 100);
-
-        // Initialize platforms
+        // Initialize platforms first
         this.platforms = [];
         this.generateInitialPlatforms();
+
+        // Initialize player on the starting platform
+        const startPlatform = this.platforms[0];
+        this.player = new Player(
+            CONFIG.canvas.width / 2 - CONFIG.player.width / 2,
+            startPlatform.y - CONFIG.player.height
+        );
 
         // Reset game state
         this.distance = 0;
@@ -414,14 +437,32 @@ class Player {
         this.velocityX = 0;
         this.velocityY = 0;
         this.isOnGround = false;
+        this.direction = 'right'; // Track facing direction
+
+        // Load bunny images
+        this.imageLeft = new Image();
+        this.imageLeft.src = 'assets/bunny_hop_left.png';
+        this.imageRight = new Image();
+        this.imageRight.src = 'assets/bunny_hop_right.png';
+        this.imageLoaded = false;
+
+        // Check when images are loaded
+        Promise.all([
+            new Promise(resolve => this.imageLeft.onload = resolve),
+            new Promise(resolve => this.imageRight.onload = resolve)
+        ]).then(() => {
+            this.imageLoaded = true;
+        });
     }
 
     update(keys) {
         // Horizontal movement
         if (keys['ArrowLeft'] || keys['a']) {
             this.velocityX = -CONFIG.player.moveSpeed;
+            this.direction = 'left';
         } else if (keys['ArrowRight'] || keys['d']) {
             this.velocityX = CONFIG.player.moveSpeed;
+            this.direction = 'right';
         } else {
             this.velocityX = 0;
         }
@@ -471,23 +512,29 @@ class Player {
     }
 
     draw(ctx) {
-        // Draw player as a square
-        ctx.fillStyle = '#FF6B6B';
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+        if (this.imageLoaded) {
+            // Draw bunny image based on direction
+            const image = this.direction === 'left' ? this.imageLeft : this.imageRight;
+            ctx.drawImage(image, this.x, this.y, this.width, this.height);
+        } else {
+            // Fallback: Draw player as a square while images load
+            ctx.fillStyle = '#FF6B6B';
+            ctx.fillRect(this.x, this.y, this.width, this.height);
 
-        // Draw player outline
-        ctx.strokeStyle = '#FF3333';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(this.x, this.y, this.width, this.height);
+            // Draw player outline
+            ctx.strokeStyle = '#FF3333';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(this.x, this.y, this.width, this.height);
 
-        // Draw eyes
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(this.x + 8, this.y + 8, 6, 6);
-        ctx.fillRect(this.x + 18, this.y + 8, 6, 6);
+            // Draw eyes
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(this.x + 8, this.y + 8, 6, 6);
+            ctx.fillRect(this.x + 18, this.y + 8, 6, 6);
 
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(this.x + 10, this.y + 10, 3, 3);
-        ctx.fillRect(this.x + 20, this.y + 10, 3, 3);
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(this.x + 10, this.y + 10, 3, 3);
+            ctx.fillRect(this.x + 20, this.y + 10, 3, 3);
+        }
     }
 }
 
